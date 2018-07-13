@@ -184,10 +184,14 @@ GlobalModel::~GlobalModel()
     glDeleteBuffers(1, &vbos[0].first);
     glDeleteTransformFeedbacks(1, &vbos[0].second);
 
+    glDeleteBuffers(1, &deleted_surfel_buffer.first);
+    glDeleteTransformFeedbacks(1, &deleted_surfel_buffer.second);
+
     glDeleteBuffers(1, &vbos[1].first);
     glDeleteTransformFeedbacks(1, &vbos[1].second);
 
     glDeleteQueries(1, &countQuery);
+    glDeleteQueries(1, &deleteQuery);
 
     glDeleteBuffers(1, &uvo);
 
@@ -195,6 +199,9 @@ GlobalModel::~GlobalModel()
     glDeleteBuffers(1, &newUnstableVbo);
 
     delete [] vbos;
+
+    cudaGraphicsUnregisterResource(mapCudaRes);
+    cudaGraphicsUnregisterResource(deletedSurfelCudaRes);
 }
 
 void GlobalModel::initialise(const FeedbackBuffer & rawFeedback,
@@ -255,6 +262,7 @@ void GlobalModel::renderPointCloud(pangolin::OpenGlMatrix mvp,
                                    const bool drawPoints,
                                    const bool drawWindow,
                                    const bool drawTimes,
+                                   const bool drawClasses,
                                    const int time,
                                    const int timeDelta)
 {
@@ -266,7 +274,7 @@ void GlobalModel::renderPointCloud(pangolin::OpenGlMatrix mvp,
 
     program->setUniform(Uniform("threshold", threshold));
 
-    program->setUniform(Uniform("colorType", (drawNormals ? 1 : drawColors ? 2 : drawTimes ? 3 : 0)));
+    program->setUniform(Uniform("colorType", (drawClasses ? 4 : drawNormals ? 1 : drawColors ? 2 : drawTimes ? 3 : 0)));
 
     program->setUniform(Uniform("unstable", drawUnstable));
 
@@ -602,6 +610,21 @@ unsigned int GlobalModel::lastCount()
     return count;
 }
 
+unsigned int GlobalModel::deletedCount()
+{
+    return deleted_count;
+}
+
+float* GlobalModel::getMapSurfelsGpu()
+{
+    return cuda_map_ptr;
+}
+
+int* GlobalModel::getDeletedSurfelsGpu()
+{
+    return cuda_deleted_surfel_ptr;
+}
+
 Eigen::Vector4f * GlobalModel::downloadMap()
 {
     glFinish();
@@ -630,4 +653,14 @@ Eigen::Vector4f * GlobalModel::downloadMap()
     glFinish();
 
     return vertices;
+}
+
+void GlobalModel::updateSurfelClass(const int surfelId, const float color)
+{
+    glFinish();
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[0].first);
+    float val = color;
+    glBufferSubData(GL_ARRAY_BUFFER,surfelId * Vertex::SIZE + sizeof(Eigen::Vector4f) + sizeof(float),sizeof(float),&val);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glFinish();
 }

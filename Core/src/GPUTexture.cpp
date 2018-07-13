@@ -43,6 +43,22 @@ GPUTexture::GPUTexture(const int width,
     if(cuda)
     {
         cudaGraphicsGLRegisterImage(&cudaRes, texture->tid, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsReadOnly);
+        cudaGraphicsMapResources(1, &cudaRes, 0);
+        cudaGraphicsSubResourceGetMappedArray(&cudaArr, cudaRes, 0, 0);
+        cudaResourceDesc resDesc;
+        cudaTextureDesc texDesc;
+        memset(&resDesc, 0, sizeof(cudaResourceDesc));
+        memset(&texDesc, 0, sizeof(cudaTextureDesc));
+        resDesc.resType = cudaResourceTypeArray;
+        resDesc.res.array.array  = cudaArr;
+        texDesc.normalizedCoords = false;
+        texDesc.addressMode[0] = cudaAddressModeClamp;
+        texDesc.addressMode[1] = cudaAddressModeClamp;
+        texDesc.filterMode = cudaFilterModePoint;
+        texDesc.readMode = cudaReadModeElementType;
+        cudaCreateTextureObject(&texObj, &resDesc, &texDesc, NULL);
+        cudaGraphicsUnmapResources(1, &cudaRes, 0);
+
     }
     else
     {

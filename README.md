@@ -1,3 +1,4 @@
+
 # ElasticFusion #
 
 Real-time dense visual SLAM system capable of capturing comprehensive dense globally consistent surfel-based maps of room scale environments explored using an RGB-D camera.
@@ -16,13 +17,13 @@ Please cite this work if you make use of our system in any of your own endeavors
 * CMake
 * OpenGL
 * [CUDA >= 7.0](https://developer.nvidia.com/cuda-downloads)
-* [OpenNI2](https://github.com/occipital/OpenNI2)
-* SuiteSparse
+* [OpenNI2](https://github.com/rockkingjy/OpenNI2)
+* [SuiteSparse](https://drive.google.com/file/d/1zT3wGWCEYmqmDb-0lkZ6p9kEE8Zgso0B/view?usp=sharing)
 * Eigen
 * zlib
 * libjpeg
-* [Pangolin](https://github.com/stevenlovegrove/Pangolin)
-* [librealsense] (https://github.com/IntelRealSense/librealsense) - Optional (for Intel RealSense cameras)
+* [Pangolin](https://github.com/rockkingjy/Pangolin)
+* [librealsense](https://github.com/rockkingjy/librealsense) - Optional (for Intel RealSense cameras)
 
 Firstly, add [nVidia's official CUDA repository](https://developer.nvidia.com/cuda-downloads) to your apt sources, then run the following command to pull in most dependencies from the official repos:
 
